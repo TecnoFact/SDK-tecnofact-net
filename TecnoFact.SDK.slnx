@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TecnoFact.SDK.Tests/TecnoFact.SDK.Tests.csproj" />
+  <Project Path="TecnoFact.SDK/TecnoFact.SDK.csproj" />
+</Solution>
