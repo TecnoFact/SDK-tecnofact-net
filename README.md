@@ -1,8 +1,24 @@
 # TecnoFact SDK para Facturación Electrónica CFDI 4.0 (.NET)
 
-[![NuGet](https://img.shields.io/nuget/v/TecnoFact.SDK.svg)](https://www.nuget.org/packages/TecnoFact.SDK/)
-[![.NET](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+
+[![NuGet Version](https://img.shields.io/nuget/v/TecnoFact.SDK.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/TecnoFact.SDK/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TecnoFact.SDK.svg?style=flat-square&logo=nuget)](https://www.nuget.org/packages/TecnoFact.SDK/)
+[![CI Build](https://img.shields.io/github/actions/workflow/status/TecnoFact/SDK-tecnofact-net/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/TecnoFact/SDK-tecnofact-net/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/TecnoFact/SDK-tecnofact-net/codeql.yml?branch=main&style=flat-square&logo=github&label=CodeQL)](https://github.com/TecnoFact/SDK-tecnofact-net/actions/workflows/codeql.yml)
+[![codecov](https://img.shields.io/codecov/c/github/TecnoFact/SDK-tecnofact-net?style=flat-square&logo=codecov)](https://codecov.io/gh/TecnoFact/SDK-tecnofact-net)
+
+[![.NET Version](https://img.shields.io/badge/.NET-10.0+-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
+[![C# Version](https://img.shields.io/badge/C%23-12.0-239120?style=flat-square&logo=csharp)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![License: MIT](https://img.shields.io/github/license/TecnoFact/SDK-tecnofact-net?style=flat-square)](https://opensource.org/licenses/MIT)
+[![GitHub Release](https://img.shields.io/github/v/release/TecnoFact/SDK-tecnofact-net?style=flat-square&logo=github)](https://github.com/TecnoFact/SDK-tecnofact-net/releases)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
+
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/TecnoFact/SDK-tecnofact-net?style=flat-square&logo=codeclimate)](https://codeclimate.com/github/TecnoFact/SDK-tecnofact-net)
+[![Security Rating](https://img.shields.io/badge/security-A+-success?style=flat-square&logo=security)](https://github.com/TecnoFact/SDK-tecnofact-net/security)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-success?style=flat-square&logo=dependabot)](https://github.com/TecnoFact/SDK-tecnofact-net/network/updates)
+
+</div>
 
 SDK oficial de .NET para la integración con el servicio de Timbrado CFDI 4.0 de TecnoFact. Facilita la emisión, cancelación y consulta de facturas electrónicas cumpliendo con los requisitos del SAT mexicano.
 
