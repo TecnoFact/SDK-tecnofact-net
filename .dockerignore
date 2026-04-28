@@ -1,0 +1,58 @@
+# Directorios de build
+**/bin/
+**/obj/
+**/out/
+
+# Archivos de usuario
+**/.vs/
+**/.vscode/
+**/.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Resultados de tests
+**/TestResults/
+**/testresults/
+**/coverage/
+**/coverage-report/
+
+# Archivos de NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Archivos de Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentación
+*.md
+!README.md
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Node modules (si hay alguno)
+node_modules/
+
+# Archivos de configuración local
+appsettings.Development.json
+appsettings.Local.json
+.env
+.env.local
+
+# Archivos de Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore

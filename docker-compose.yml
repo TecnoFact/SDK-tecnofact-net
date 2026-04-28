@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # Servicio principal de tests
+  sdk-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    container_name: tecnofact-sdk-tests
+    volumes:
+      - ./testresults:/testresults
+      - ./coverage:/coverage
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - DOTNET_ENVIRONMENT=Testing
+    networks:
+      - tecnofact-network
+
+  # Servicio de desarrollo con hot reload
+  sdk-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: tecnofact-sdk-dev
+    volumes:
+      - .:/workspace
+      - dotnet-packages:/root/.nuget/packages
+    working_dir: /workspace
+    command: dotnet watch test --project TecnoFact.SDK.Tests/TecnoFact.SDK.Tests.csproj
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    networks:
+      - tecnofact-network
+    stdin_open: true
+    tty: true
+
+  # Servicio para análisis de cobertura
+  coverage-report:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: tecnofact-coverage-report
+    volumes:
+      - .:/workspace
+      - ./coverage:/coverage
+      - ./coverage-report:/coverage-report
+    working_dir: /workspace
+    command: >
+      sh -c "
+        dotnet test TecnoFact.SDK.Tests/TecnoFact.SDK.Tests.csproj 
+        --collect:'XPlat Code Coverage' 
+        --results-directory /coverage &&
+        reportgenerator 
+        -reports:/coverage/**/coverage.cobertura.xml 
+        -targetdir:/coverage-report 
+        -reporttypes:'Html;Badges;TextSummary'
+      "
+    networks:
+      - tecnofact-network
+
+  # Servicio para ejecutar tests de integración (futuro)
+  sdk-integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    container_name: tecnofact-integration-tests
+    volumes:
+      - ./testresults:/testresults
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Integration
+      - DOTNET_ENVIRONMENT=Integration
+      - TECNOFACT_API_KEY=${TECNOFACT_API_KEY:-test_key}
+      - TECNOFACT_API_SECRET=${TECNOFACT_API_SECRET:-test_secret}
+      - TECNOFACT_ENVIRONMENT=Sandbox
+    networks:
+      - tecnofact-network
+    depends_on:
+      - mock-api
+
+  # Mock API para tests de integración
+  mock-api:
+    image: mockserver/mockserver:latest
+    container_name: tecnofact-mock-api
+    ports:
+      - "1080:1080"
+    environment:
+      - MOCKSERVER_PROPERTY_FILE=/config/mockserver.properties
+      - MOCKSERVER_INITIALIZATION_JSON_PATH=/config/initializerJson.json
+    volumes:
+      - ./tests/mock-api:/config
+    networks:
+      - tecnofact-network
+
+  # Servicio para ejecutar análisis de código
+  code-analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: tecnofact-code-analysis
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: >
+      sh -c "
+        dotnet format --verify-no-changes --verbosity diagnostic &&
+        dotnet build --configuration Release /warnaserror
+      "
+    networks:
+      - tecnofact-network
+
+networks:
+  tecnofact-network:
+    driver: bridge
+
+volumes:
+  dotnet-packages:
+    driver: local
