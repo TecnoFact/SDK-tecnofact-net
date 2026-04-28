@@ -1,0 +1,128 @@
+[
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/api/health"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "healthy",
+        "version": "1.0.0",
+        "timestamp": "2026-04-28T00:00:00Z"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/api/cfdi/timbrar",
+      "headers": {
+        "Content-Type": ["application/json"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "success": true,
+        "uuid": "12345678-1234-1234-1234-123456789012",
+        "xml": "<?xml version='1.0' encoding='UTF-8'?>...",
+        "pdf": "base64_encoded_pdf",
+        "fecha_timbrado": "2026-04-28T12:00:00Z"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/api/cfdi/cancelar",
+      "headers": {
+        "Content-Type": ["application/json"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "success": true,
+        "message": "CFDI cancelado exitosamente",
+        "acuse": "base64_encoded_acuse"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/api/cfdi/.*",
+      "pathParameters": {
+        "uuid": [".*"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "uuid": "12345678-1234-1234-1234-123456789012",
+        "status": "vigente",
+        "xml": "<?xml version='1.0' encoding='UTF-8'?>...",
+        "pdf": "base64_encoded_pdf"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/api/cfdi/timbrar",
+      "headers": {
+        "Authorization": ["Basic invalid_credentials"]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 401,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "error": "Unauthorized",
+        "message": "Invalid credentials"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/api/cfdi/timbrar",
+      "body": {
+        "type": "JSON",
+        "json": {
+          "emisor": {
+            "rfc": "INVALID"
+          }
+        }
+      }
+    },
+    "httpResponse": {
+      "statusCode": 400,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "error": "Validation Error",
+        "message": "RFC inválido",
+        "details": {
+          "rfc": "El RFC debe tener 12 o 13 caracteres"
+        }
+      }
+    }
+  }
+]
