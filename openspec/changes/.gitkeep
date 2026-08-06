@@ -1,0 +1,2 @@
+# Active SDD changes live here as {change-name}/ subdirectories.
+# Each change folder holds: state.yaml, proposal.md, specs/, design.md, tasks.md, verify-report.md.

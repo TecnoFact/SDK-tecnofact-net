@@ -1,0 +1,77 @@
+# OpenSpec / SDD configuration — TecnoFact .NET SDK
+# Artifact store: openspec (file-based). Engram used only for cross-session recovery.
+# Bootstrap created by sdd-init. Change proposals/specs/design/tasks live under openspec/changes/.
+
+schema: spec-driven
+
+project:
+  name: sdk-tecnofact-net
+  language: C#
+  runtime: .NET 10 (net10.0)
+  solution: TecnoFact.SDK.slnx
+
+context: |
+  C# / .NET 10 SDK for the TecnoFact CFDI 4.0 timbrado service.
+  Solution: TecnoFact.SDK.slnx (new slnx format).
+  Main lib: TecnoFact.SDK.csproj (NuGet package TecnoFact.SDK, MIT, Nullable+ImplicitUsings,
+  LangVersion=latest, GenerateDocumentationFile=true). No StyleCop/analyzer packages.
+  Test project: TecnoFact.SDK.Tests.csproj — xUnit + FluentAssertions + Moq + coverlet.
+  Layout namespaces: Config/, Contracts/ (IHttpClient), Http/ (TecnoFactHttpClient), Enums/,
+  Exceptions/, Models/ (CFDI 4.0). JSON via System.Text.Json (SnakeCaseLower, WhenWritingNull).
+  Auth: Basic (ApiKey:ApiSecret base64) — PENDING migration to Bearer/token flow to match PHP SDK.
+  Tests mirror source by name (ConfigTests, EnumTests, ExceptionTests, HttpClientTests,
+  ModelTests, ModelValidationTests), flat under the test project (no subfolders).
+
+testing:
+  runner: xUnit
+  framework: xUnit 2.9.3 + FluentAssertions 8.9.0 + Moq 4.20.72
+  coverage: coverlet (XPlat Code Coverage) — collected in CI, NO threshold/gate enforced
+  test_command: dotnet test TecnoFact.SDK.slnx
+  ci_test_command: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+  strict_tdd: true
+  strict_tdd_reason: No explicit marker found, but a test runner and test files exist; decision gate defaults to true.
+  local_runtime_note: dotnet CLI is not on PATH in this session; run tests in CI or a shell with the .NET 10 SDK.
+  known_blocker: TecnoFact.SDK.Tests.csproj has committed git conflict markers on main (commit 649b6fb) that break the build until resolved.
+
+quality:
+  formatter: dotnet format (CI runs `dotnet format --verify-no-changes` with continue-on-error: true — NOT enforced)
+  editorconfig: present (dotnet/csharp style rules, 4-space indent, Allman braces, var preferred, Interface I-prefix rule)
+  analyzers: none declared in csproj
+
+conventions:
+  model_style: POCOs with [JsonPropertyName] snake_case mapping, PascalCase props, default string.Empty, GetX() accessors and ToDictionary().
+  config_style: immutable (readonly props, constructor validation throwing ArgumentException).
+  exceptions: TecnoFactException base (Details + StatusCode) -> AuthenticationException, ValidationException, NotFoundException, RateLimitException, ServerException, CancelacionException, TimbradoException.
+  http: IHttpClient contract; TecnoFactHttpClient implements retry with exponential backoff (Math.Pow(2, attempt)) and status->exception switch.
+  enums: enums paired with static extension classes (IsProduction/IsSandbox/Label/Value/GetBaseUrl pattern).
+  comments: XML doc comments are written in Spanish.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Note auth-model migration (Basic -> Bearer/token) when touching Http/ or Config/
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Cover retry, status->exception mapping, and auth header behavior for HTTP-touching changes
+  design:
+    - Include sequence diagrams for complex flows (timbrado, cancelacion, retry)
+    - Document architecture decisions with rationale
+    - Call out breaking changes to public API surface (NuGet consumers)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - Update tests alongside source (mirror-by-name convention)
+  apply:
+    guidelines:
+      - Follow existing code patterns (immutable config, snake_case JSON, exception hierarchy)
+      - Keep TecnoFactHttpClient as the single HTTP entrypoint; do not bypass IHttpClient
+    tdd: true
+    test_command: "dotnet test TecnoFact.SDK.slnx"
+  verify:
+    test_command: "dotnet test TecnoFact.SDK.slnx --configuration Release --verbosity normal"
+    build_command: "dotnet build TecnoFact.SDK.slnx --configuration Release"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+    - Preserve NuGet API surface compatibility unless explicitly broken
