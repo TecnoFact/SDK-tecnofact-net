@@ -1,4 +1,5 @@
 using TecnoFact.SDK.Enums;
+using System.Net.Mail;
 
 namespace TecnoFact.SDK.Config;
 
@@ -16,6 +17,16 @@ public class TecnoFactConfig
     /// API Secret de TecnoFact
     /// </summary>
     public string ApiSecret { get; }
+
+    /// <summary>
+    /// Email de la cuenta TecnoFact para la autenticación del panel
+    /// </summary>
+    public string? Email { get; }
+
+    /// <summary>
+    /// Contraseña de la cuenta TecnoFact para la autenticación del panel
+    /// </summary>
+    public string? Password { get; }
 
     /// <summary>
     /// Entorno de ejecución
@@ -67,6 +78,64 @@ public class TecnoFactConfig
         Retries = retries;
     }
 
+    private TecnoFactConfig(
+        string email,
+        string password,
+        TecnoFactEnvironment environment,
+        int timeout,
+        int retries,
+        bool usesUserCredentials)
+    {
+        ApiKey = string.Empty;
+        ApiSecret = string.Empty;
+        Email = email;
+        Password = password;
+        Environment = environment;
+        Timeout = timeout;
+        Retries = retries;
+    }
+
+    /// <summary>
+    /// Crea una configuración con las credenciales de usuario del panel TecnoFact.
+    /// </summary>
+    /// <param name="email">Correo electrónico de la cuenta TecnoFact</param>
+    /// <param name="password">Contraseña de la cuenta TecnoFact</param>
+    /// <param name="environment">Entorno (Sandbox o Production)</param>
+    /// <param name="timeout">Timeout en segundos (por defecto 30)</param>
+    /// <param name="retries">Número de reintentos (por defecto 3)</param>
+    /// <exception cref="ArgumentException">Si los parámetros no son válidos</exception>
+    public static TecnoFactConfig ForUserCredentials(
+        string email,
+        string password,
+        TecnoFactEnvironment environment = TecnoFactEnvironment.Sandbox,
+        int timeout = 30,
+        int retries = 3)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("email is required", nameof(email));
+
+        try
+        {
+            if (!string.Equals(new MailAddress(email).Address, email, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("email must be valid", nameof(email));
+        }
+        catch (FormatException)
+        {
+            throw new ArgumentException("email must be valid", nameof(email));
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("password is required", nameof(password));
+
+        if (timeout <= 0)
+            throw new ArgumentException("timeout must be greater than 0", nameof(timeout));
+
+        if (retries < 0)
+            throw new ArgumentException("retries must be non-negative", nameof(retries));
+
+        return new TecnoFactConfig(email, password, environment, timeout, retries, usesUserCredentials: true);
+    }
+
     /// <summary>
     /// Obtiene la URL base del entorno configurado
     /// </summary>
@@ -92,14 +161,20 @@ public class TecnoFactConfig
     /// </summary>
     public Dictionary<string, object> ToDictionary()
     {
-        return new Dictionary<string, object>
+        var values = new Dictionary<string, object>
         {
-            ["api_key"] = ApiKey,
-            ["api_secret"] = ApiSecret,
             ["environment"] = Environment.Value(),
             ["base_url"] = GetBaseUrl(),
             ["timeout"] = Timeout,
             ["retries"] = Retries
         };
+
+        if (!string.IsNullOrEmpty(ApiKey))
+        {
+            values["api_key"] = ApiKey;
+            values["api_secret"] = ApiSecret;
+        }
+
+        return values;
     }
 }

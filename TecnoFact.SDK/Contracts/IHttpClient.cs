@@ -6,6 +6,11 @@ namespace TecnoFact.SDK.Contracts;
 public interface IHttpClient
 {
     /// <summary>
+    /// Autentica las credenciales de usuario del panel y configura la autorización Bearer.
+    /// </summary>
+    Task LoginAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Realiza una petición GET
     /// </summary>
     Task<TResponse> GetAsync<TResponse>(string endpoint, Dictionary<string, string>? queryParams = null, CancellationToken cancellationToken = default);

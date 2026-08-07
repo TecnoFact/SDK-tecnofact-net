@@ -73,6 +73,24 @@ public class Concepto
     [JsonPropertyName("impuestos")]
     public ImpuestosConcepto? Impuestos { get; set; }
 
+    /// <summary>
+    /// Third-party taxpayer on whose behalf the operation is performed.
+    /// </summary>
+    [JsonPropertyName("a_cuenta_terceros")]
+    public ACuentaTerceros? ACuentaTerceros { get; set; }
+
+    /// <summary>
+    /// Información aduanera para mercancías importadas.
+    /// </summary>
+    [JsonPropertyName("informacion_aduanera")]
+    public List<InformacionAduanera>? InformacionAduanera { get; set; }
+
+    /// <summary>
+    /// Property account information for the concept.
+    /// </summary>
+    [JsonPropertyName("cuenta_predial")]
+    public List<CuentaPredial>? CuentaPredial { get; set; }
+
     public Concepto()
     {
     }
@@ -109,7 +127,10 @@ public class Concepto
             ["descuento"] = Descuento,
             ["unidad"] = Unidad,
             ["no_identificacion"] = NoIdentificacion,
-            ["impuestos"] = Impuestos?.ToDictionary()
+            ["impuestos"] = Impuestos?.ToDictionary(),
+            ["a_cuenta_terceros"] = ACuentaTerceros?.ToDictionary(),
+            ["informacion_aduanera"] = InformacionAduanera?.Select(informacion => informacion.ToDictionary()).ToList(),
+            ["cuenta_predial"] = CuentaPredial?.Select(cuenta => cuenta.ToDictionary()).ToList()
         };
     }
 }

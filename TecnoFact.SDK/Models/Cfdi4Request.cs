@@ -92,10 +92,28 @@ public class Cfdi4Request
     public List<CfdiRelacionados>? CfdiRelacionados { get; set; }
 
     /// <summary>
+    /// Global invoice information for public-general operations
+    /// </summary>
+    [JsonPropertyName("informacion_global")]
+    public InformacionGlobal? InformacionGlobal { get; set; }
+
+    /// <summary>
     /// Exportación
     /// </summary>
     [JsonPropertyName("exportacion")]
     public string? Exportacion { get; set; }
+
+    /// <summary>
+    /// Fecha y hora de expedición
+    /// </summary>
+    [JsonPropertyName("fecha")]
+    public DateTime? Fecha { get; set; }
+
+    /// <summary>
+    /// Código postal del lugar de expedición
+    /// </summary>
+    [JsonPropertyName("lugar_expedicion")]
+    public string? LugarExpedicion { get; set; }
 
     public Cfdi4Request()
     {
@@ -126,7 +144,10 @@ public class Cfdi4Request
             ["total"] = Total,
             ["impuestos"] = Impuestos?.ToDictionary(),
             ["cfdi_relacionados"] = CfdiRelacionados?.Select(c => c.ToDictionary()).ToList(),
-            ["exportacion"] = Exportacion
+            ["informacion_global"] = InformacionGlobal?.ToDictionary(),
+            ["exportacion"] = Exportacion,
+            ["fecha"] = Fecha,
+            ["lugar_expedicion"] = LugarExpedicion
         };
     }
 }
