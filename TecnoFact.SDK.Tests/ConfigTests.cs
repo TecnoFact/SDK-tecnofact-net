@@ -25,6 +25,42 @@ public class ConfigTests
     }
 
     [Fact]
+    public void ForUserCredentials_WithValidParameters_CreatesConfig()
+    {
+        var config = TecnoFactConfig.ForUserCredentials(
+            email: "test@example.com",
+            password: "password123",
+            environment: TecnoFactEnvironment.Production,
+            timeout: 60,
+            retries: 5
+        );
+
+        Assert.Equal("test@example.com", config.Email);
+        Assert.Equal("password123", config.Password);
+        Assert.Equal(TecnoFactEnvironment.Production, config.Environment);
+        Assert.Equal(60, config.Timeout);
+        Assert.Equal(5, config.Retries);
+        Assert.DoesNotContain("email", config.ToDictionary().Keys);
+        Assert.DoesNotContain("password", config.ToDictionary().Keys);
+    }
+
+    [Fact]
+    public void ForUserCredentials_WithInvalidEmail_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            TecnoFactConfig.ForUserCredentials("not-an-email", "password123")
+        );
+    }
+
+    [Fact]
+    public void ForUserCredentials_WithEmptyPassword_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            TecnoFactConfig.ForUserCredentials("test@example.com", "")
+        );
+    }
+
+    [Fact]
     public void Constructor_WithEmptyApiKey_ThrowsArgumentException()
     {
         Assert.Throws<ArgumentException>(() =>

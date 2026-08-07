@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using TecnoFact.SDK.Config;
 using TecnoFact.SDK.Contracts;
+using TecnoFact.SDK.Enums;
 using TecnoFact.SDK.Exceptions;
 
 namespace TecnoFact.SDK.Http;
@@ -14,6 +15,8 @@ namespace TecnoFact.SDK.Http;
 /// </summary>
 public class TecnoFactHttpClient : IHttpClient, IDisposable
 {
+    private const string PanelLoginEndpoint = "https://panelcfdi.tecnofact.mx/api/login";
+
     private readonly HttpClient _httpClient;
     private readonly TecnoFactConfig _config;
     private readonly JsonSerializerOptions _jsonOptions;
@@ -26,8 +29,11 @@ public class TecnoFactHttpClient : IHttpClient, IDisposable
         _httpClient.BaseAddress = new Uri(_config.GetBaseUrl());
         _httpClient.Timeout = TimeSpan.FromSeconds(_config.GetTimeout());
         
-        var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_config.ApiKey}:{_config.ApiSecret}"));
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+        if (!string.IsNullOrEmpty(_config.ApiKey))
+        {
+            var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_config.ApiKey}:{_config.ApiSecret}"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+        }
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "TecnoFact-SDK-NET/1.0.0");
 
@@ -37,6 +43,53 @@ public class TecnoFactHttpClient : IHttpClient, IDisposable
             WriteIndented = false,
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
         };
+    }
+
+    /// <summary>
+    /// Autentica las credenciales de usuario del panel y conserva el token de acceso para peticiones posteriores.
+    /// </summary>
+    public async Task LoginAsync(CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(_config.Email) || string.IsNullOrWhiteSpace(_config.Password))
+            throw new AuthenticationException("User credentials are required for panel authentication.");
+
+        if (!_config.Environment.IsProduction())
+            throw new AuthenticationException("Panel authentication is available only in production.");
+
+        var credentials = new
+        {
+            email = _config.Email,
+            password = _config.Password
+        };
+        var json = JsonSerializer.Serialize(credentials, _jsonOptions);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var response = await _httpClient.PostAsync(PanelLoginEndpoint, content, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+            throw new AuthenticationException("Authentication failed.");
+
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        try
+        {
+            using var document = JsonDocument.Parse(responseContent);
+            var token = document.RootElement.TryGetProperty("access_token", out var accessToken)
+                && accessToken.ValueKind == JsonValueKind.String
+                ? accessToken.GetString()
+                : null;
+
+            if (string.IsNullOrWhiteSpace(token)
+                || !token.All(static character => char.IsAsciiLetterOrDigit(character)
+                    || character is '-' or '.' or '_' or '~' or '+' or '/' or '='))
+            {
+                throw new AuthenticationException("Authentication response did not contain a valid access token.");
+            }
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        catch (JsonException)
+        {
+            throw new AuthenticationException("Authentication response was invalid.");
+        }
     }
 
     public async Task<TResponse> GetAsync<TResponse>(string endpoint, Dictionary<string, string>? queryParams = null, CancellationToken cancellationToken = default)
